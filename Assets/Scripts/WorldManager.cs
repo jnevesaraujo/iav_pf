@@ -81,7 +81,6 @@ public class WorldManager : MonoBehaviour
             if (!activeChunks.ContainsKey(chunkCoord))
             {
                 SpawnChunk(chunkCoord);
-                activeChunks[chunkCoord].GetComponent<Chunk>().DrawChunk();
             }
         }
 
@@ -105,6 +104,7 @@ public class WorldManager : MonoBehaviour
             return;
         }
         chunk.Initialize(coord, chunkMaterial, this);
+        chunk.DrawChunk();
 
         // TODO: Registar no Dictionary activeChunks
         activeChunks[coord] = chunkObject;
