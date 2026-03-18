@@ -510,7 +510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldManager
   player: {fileID: 739393335}
   chunkPrefab: {fileID: 8433610731246904364, guid: 5ebd7ddc64037ff4691eba0b1e3f1a47, type: 3}
-  chunkMaterial: {fileID: 0}
+  chunkMaterial: {fileID: 2100000, guid: 6f1877ca5268dc74fa192f4a62184fd5, type: 2}
   renderDistance: 3
   chunkSize: 16
   gridSize: 5
