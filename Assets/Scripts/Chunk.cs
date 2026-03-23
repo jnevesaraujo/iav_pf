@@ -132,15 +132,6 @@ public class Chunk : MonoBehaviour
             }
     }
 
-    bool HasAnySideAir(int x, int y, int z)
-    {
-        return !HasSolidNeighbour(x, y + 1, z) ||
-               !HasSolidNeighbour(x, y, z + 1) ||
-               !HasSolidNeighbour(x, y, z - 1) ||
-               !HasSolidNeighbour(x - 1, y, z) ||
-               !HasSolidNeighbour(x + 1, y, z);
-    }
-
     void BuildMushroom(int startX, int startY, int startZ)
     {
 
@@ -193,6 +184,14 @@ public class Chunk : MonoBehaviour
         }
     }
 
+    bool HasAnySideAir(int x, int y, int z)
+    {
+        return !HasSolidNeighbour(x, y + 1, z) ||
+               !HasSolidNeighbour(x, y, z + 1) ||
+               !HasSolidNeighbour(x, y, z - 1) ||
+               !HasSolidNeighbour(x - 1, y, z) ||
+               !HasSolidNeighbour(x + 1, y, z);
+    }
 
     bool HasSolidNeighbour(int x, int y, int z)
     {
