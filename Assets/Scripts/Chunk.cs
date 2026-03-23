@@ -39,8 +39,12 @@ public class Chunk : MonoBehaviour
     {
         chunkData = new Block[chunkSize, chunkSize, chunkSize];
         int[,] surfaceHeight = new int[chunkSize, chunkSize];
+
+        // NOVO: Array para guardar o bloco que a classe WonderlandGenerator decidir para cada (x,z)
+        Block.BlockType[,] surfaceTypes = new Block.BlockType[chunkSize, chunkSize];
+
         int margin = 2;
-        float wx, wz, heightNoise, densityNoise, continentalness, baseHeight, detail, finalHeight;
+        float wx, wz, densityNoise;
         // Preencher os blocos baseados na densidade
         for (int x = 0; x < chunkSize; x++)
             for (int z = 0; z < chunkSize; z++)
@@ -48,10 +52,7 @@ public class Chunk : MonoBehaviour
                 wx = worldOffset.x * chunkSize + x;
                 wz = worldOffset.y * chunkSize + z;
 
-                continentalness = NoiseUtils.FBm(wx, wz, 2, 0.02f);                    // escala muito grande
-                baseHeight = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.02f), exponent);     // forma do terreno
-                detail = NoiseUtils.FBm(wx, wz, 6, 0.1f);                               // detalhe fino
-                finalHeight = Mathf.Lerp(seaLevel, maxHeight, continentalness * baseHeight) + detail * detailAmplitude;
+                WonderlandGenerator.GetBiomeData(wx, wz, out float finalHeight, out surfaceTypes[x, z]);
            
                 // primeira passagem para definir altura da superficie
                 for (int y = 0; y < chunkSize; y++)
@@ -80,19 +81,17 @@ public class Chunk : MonoBehaviour
                     }
 
                     chunkData[x, y, z] = new Block(solid ? Block.BlockType.DIRT : Block.BlockType.AIR, new Vector3(x, y, z));
-                    if (z == 0 && y == 0)
-                        Debug.Log($"x={x} continental={continentalness:F2} base={baseHeight:F2} final={finalHeight:F2}");
                 }
 
             }
 
-        // Deterministic start point based on chunk position
+        // Inicio deterministico baseado na posição do chunk
         float wx0 = worldOffset.x * chunkSize;
         float wz0 = worldOffset.y * chunkSize;
         float startNoise = NoiseUtils.FBm(wx0, wz0, 4, 0.05f);
         int startX = Mathf.FloorToInt((startNoise * 0.5f + 0.5f) * chunkSize);
         int startZ = Mathf.FloorToInt((startNoise * 0.3f + 0.5f) * chunkSize);
-        int startY = surfaceHeight[startX, startZ] / 2; // mid-underground
+        int startY = surfaceHeight[startX, startZ] / 2; // meio do chão
 
         CaveGenerator.CarveWorm(chunkData, chunkSize, worldOffset,
             new Vector3(wx0 + startX, startY, wz0 + startZ),
@@ -117,26 +116,10 @@ public class Chunk : MonoBehaviour
                             !HasSolidNeighbour(x + 1, y, z)))
                         chunkData[x, y, z].type = Block.BlockType.STONE;
                     else if (!HasSolidNeighbour(x, y + 1, z))
-                                chunkData[x, y, z].type = Block.BlockType.GRASS;
-                    // else stays DIRT
+                        chunkData[x, y, z].type = surfaceTypes[x, z];
                 }
     }
-    // TODO: implementar
 
-
-    /* bool HasSolidNeighbour(int x, int y, int z)
-    {
-        // TODO
-        // Se (x,y,z) está fora dos limites do chunk → return ???
-        // Senão → return chunkData[x, y, z].???
-
-        if (x < 0 || x >= chunkSize ||
-            y < 0 || y >= chunkSize ||
-            z < 0 || z >= chunkSize)
-            return false;
-
-        return chunkData[x, y, z].isSolid;
-    } */
 
     bool HasSolidNeighbour(int x, int y, int z)
     {
@@ -225,7 +208,7 @@ public class Chunk : MonoBehaviour
 
         // 3. Criar Mesh, atribuir arrays
         Mesh mesh = new Mesh();
-        // use 32-bit index format since 16^3 blocks * 6 faces * 4 verts > 65535 (16-bit limit)
+        // usar indices 32-bit pq 16^3 blocks * 6 faces * 4 verts > 65535 (limite 16-bit)
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();

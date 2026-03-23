@@ -16,7 +16,7 @@ public class Block
     static readonly Vector3 v6 = new Vector3(0.5f, 0.5f, -0.5f);
     static readonly Vector3 v7 = new Vector3(-0.5f, 0.5f, -0.5f);
 
-    public enum BlockType { GRASS, DIRT, STONE, AIR }
+    public enum BlockType { GRASS, DIRT, STONE, AIR, CHESS_RED, CHESS_WHITE }
     public BlockType type;
 
     public Block(BlockType type, Vector3 position)
@@ -80,11 +80,21 @@ public class Block
         Vector2 lbc;
         if (type == BlockType.GRASS)
         {
+            //coluna 2, linha 6
             if (face == CubeFace.Top) lbc = new Vector2(2f, 6f) / 16;
+            // coluna 2, linha 15
             else if (face == CubeFace.Bottom) lbc = new Vector2(2f, 15f) / 16;
+            // coluna 3, linha 15
             else lbc = new Vector2(3f, 15f) / 16;
         }
+        // coluna 2, linha 15
         else if (type == BlockType.DIRT) lbc = new Vector2(2f, 15f) / 16;
+        // coluna 0, linha 2
+        else if (type == BlockType.CHESS_RED) 
+            lbc = new Vector2(0f, 13f) / 16;
+        // coluna 1, linha 2
+        else if (type == BlockType.CHESS_WHITE) 
+            lbc = new Vector2(1f, 13f) / 16;
         else lbc = new Vector2(0f, 14f) / 16;
         Vector2 uv00 = lbc; // inferior-esquerdo
         Vector2 uv10 = lbc + new Vector2(1f, 0f) / 16; // inferior-direito

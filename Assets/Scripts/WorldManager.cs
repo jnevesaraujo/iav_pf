@@ -32,11 +32,6 @@ public class WorldManager : MonoBehaviour
     void Update()
     {
         Vector2Int current = GetPlayerChunk();
-        /*         if (current != lastPlayerChunk)
-                {
-                    lastPlayerChunk = current;
-                    UpdateChunks();
-                } */
 
         if (current != lastPlayerChunk)
         {
@@ -92,52 +87,6 @@ public class WorldManager : MonoBehaviour
         Vector3 pos = player.position;
         return new Vector2Int(Mathf.FloorToInt(pos.x / chunkSize), Mathf.FloorToInt(pos.z / chunkSize));
     }
-    /* void UpdateChunks()
-    {
-
-        Vector2Int playerChunk = GetPlayerChunk();
-
-        // TODO: 1.Construir HashSet<Vector2Int> com os chunks necessarios
-        // (todos os (cx,cz) dentro de renderDistance do centro)
-        HashSet<Vector2Int> neededChunks = new HashSet<Vector2Int>();
-        for (int cx = playerChunk.x - renderDistance; cx <= playerChunk.x + renderDistance; cx++)
-        {
-            for (int cz = playerChunk.y - renderDistance; cz <= playerChunk.y + renderDistance; cz++)
-            {
-                neededChunks.Add(new Vector2Int(cx, cz));
-            }
-        }
-
-        // TODO: 2.Remover chunks que já não são necessarios
-        // Atenção: não modificar o Dictionary enquanto se itera!
-        // Sugestão: recolher as chaves a remover numa lista separada
-        List<Vector2Int> chunksToRemove = new List<Vector2Int>();
-        foreach (var chunkCoord in activeChunks.Keys)
-        {
-            if (!neededChunks.Contains(chunkCoord))
-            {
-                chunksToRemove.Add(chunkCoord);
-            }
-        }
-
-        // Remover chunks fora da distancia segurança
-        foreach (var chunkCoord in chunksToRemove)
-        {
-            Destroy(activeChunks[chunkCoord]);
-            activeChunks.Remove(chunkCoord);
-            Debug.Log($"Chunk removido em {chunkCoord}");
-        }
-
-        // TODO: 3.Spawnar os chunks de 'needed' que ainda não existem
-        foreach (var chunkCoord in neededChunks)
-        {
-            if (!activeChunks.ContainsKey(chunkCoord))
-            {
-                SpawnChunk(chunkCoord);
-            }
-        }
-
-    } */
 
     void SpawnChunk(Vector2Int coord)
     {
