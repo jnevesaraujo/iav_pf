@@ -53,11 +53,11 @@ public class Chunk : MonoBehaviour
                 wz = worldOffset.y * chunkSize + z;
 
                 WonderlandGenerator.GetBiomeData(wx, wz, out float finalHeight, out surfaceTypes[x, z]);
-           
+
                 // primeira passagem para definir altura da superficie
                 for (int y = 0; y < chunkSize; y++)
                 {
-                    
+
                     //heightNoise = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.05f), exponent) * chunkSize;
                     densityNoise = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
                     if (finalHeight - y + densityNoise > 0f)
@@ -117,7 +117,94 @@ public class Chunk : MonoBehaviour
                         chunkData[x, y, z].type = Block.BlockType.STONE;
                     else if (!HasSolidNeighbour(x, y + 1, z))
                         chunkData[x, y, z].type = surfaceTypes[x, z];
+
+                    // --- SEMENTE DE COGUMELOS ---
+                    // Verificar se estamos no bioma dos cogumelos e se é superfície
+                    /*                     else if (surfaceTypes[x, z] == Block.BlockType.DIRT && y == surfaceHeight[x, z] - 1)
+                                        {
+                                            // frequência alta para criar ruído branco
+                                            float mushroomChance = NoiseUtils.FBm(worldOffset.x * chunkSize + x, worldOffset.y * chunkSize + z, 1, 0.87f);
+
+                                            if (mushroomChance > 0.85f)
+                                            {
+                                                BuildMushroom(x, y + 1, z);
+                                            }
+                                        } */
                 }
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int z = 0; z < chunkSize; z++)
+            {
+                // Só queremos plantar na superfície, por isso lemos a altura que guardámos
+                int y = surfaceHeight[x, z];
+
+                // Verificamos se há bloco sólido (chão) e se é DIRT (Bioma dos Cogumelos)
+                if (chunkData[x, y, z].isSolid && chunkData[x, y, z].type == Block.BlockType.DIRT)
+                {
+                    // Frequência alta com offset para evitar números inteiros
+                    float mushroomChance = NoiseUtils.FBm(worldOffset.x * chunkSize + x + 0.5f, worldOffset.y * chunkSize + z + 0.5f, 1, 0.87f);
+
+                    if (mushroomChance > 0.85f)
+                    {
+                        // Plantamos o cogumelo um bloco acima do chão
+                        BuildMushroom(x, y + 1, z);
+                    }
+                }
+            }
+        }
+
+    }
+
+    void BuildMushroom(int startX, int startY, int startZ)
+    {
+
+        float wx = worldOffset.x * chunkSize + startX;
+        float wz = worldOffset.y * chunkSize + startZ;
+
+        // Perlin Noise para variar a altura de cada cogumelo
+        float noiseValue = NoiseUtils.FBm(wx, wz, 4, 0.05f);
+
+        // Adaptar valor do ruido para a altura desejada (entre 4 a 9 blocos)
+        int stemHeight = Mathf.RoundToInt(Mathf.Lerp(4f, 9f, noiseValue));
+
+        int capRadius = 2;
+
+        // Pé do cogumelo
+        for (int y = 0; y < stemHeight; y++)
+        {
+            int currentY = startY + y;
+
+            // Garantir que não tenta construir acima do topo do chunk
+            if (currentY >= chunkSize) break;
+
+            chunkData[startX, currentY, startZ] = new Block(Block.BlockType.MUSHROOM_STEM, new Vector3(startX, currentY, startZ));
+        }
+
+        // Topo do cogumelo
+        int capY = startY + stemHeight;
+
+        // Verifica se o topo não passa do limite do chunk
+        if (capY < chunkSize)
+        {
+            // Quadrado à volta do topo
+            for (int dx = -capRadius; dx <= capRadius; dx++)
+            {
+                for (int dz = -capRadius; dz <= capRadius; dz++)
+                {
+                    // Corta os 4 cantos do quadrado para o chapéu ficar mais redondo
+                    if (Mathf.Abs(dx) == capRadius && Mathf.Abs(dz) == capRadius) continue;
+
+                    int capX = startX + dx;
+                    int capZ = startZ + dz;
+
+                    // Garantir que não tenta construir fora dos limites horizontais deste chunk para não Index Out of Bounds
+                    if (capX >= 0 && capX < chunkSize && capZ >= 0 && capZ < chunkSize)
+                    {
+                        chunkData[capX, capY, capZ] = new Block(Block.BlockType.MUSHROOM_CAP, new Vector3(capX, capY, capZ));
+                    }
+                }
+            }
+        }
     }
 
 

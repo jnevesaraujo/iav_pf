@@ -7,9 +7,11 @@ public static class WonderlandGenerator
     public static void GetBiomeData(float wx, float wz, out float finalHeight, out Block.BlockType surfaceBlock)
     {
         // Calculo do Ruído
+        // x, z, octaves, scale, persistence, lacunarity
         float magicNoise = NoiseUtils.FBm(wx, wz, 1, 0.005f);
+        //float magicNoise = 0.8f;
 
-        if (magicNoise < 0.4f)
+        if (magicNoise < 0.45f)
         {
             // --- ZONA NORMAL ---
             float continentalness = NoiseUtils.FBm(wx, wz, 2, 0.02f);
@@ -19,7 +21,7 @@ public static class WonderlandGenerator
             finalHeight = Mathf.Lerp(4f, 14f, continentalness * baseHeight) + detail * 2f;
             surfaceBlock = Block.BlockType.GRASS;
         }
-        else if (magicNoise >= 0.4f && magicNoise < 0.7f)
+        else if (magicNoise >= 0.45f && magicNoise < 0.55f)
         {
             // --- ZONA DO XADREZ ---
             // Altura plana: fixada a altura num valor baixo com apenas um detalhe
@@ -34,9 +36,16 @@ public static class WonderlandGenerator
         }
         else
         {
-            // --- ZONA DOS COGUMELOS TBD ---
-            finalHeight = 12f; // placeholder temporário
-            surfaceBlock = Block.BlockType.DIRT; // placeholder temporário
+            // --- ZONA DOS COGUMELOS ---
+            // frequência alta no baseHeight para criar reentrancias no terreno
+            float baseBumps = Mathf.Pow(NoiseUtils.FBm(wx, wz, 3, 0.08f), 2f);
+            
+            // O chão base vai oscilar entre 3 e 8 de altura
+            finalHeight = Mathf.Lerp(3f, 8f, baseBumps); 
+            
+            // O chão do bosque pode ser DIRT
+            surfaceBlock = Block.BlockType.DIRT; 
+
         }
     }
 }
