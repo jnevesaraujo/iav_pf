@@ -17,6 +17,7 @@ public class Chunk : MonoBehaviour
     // variaveis para grutas
     public float caveScale = 0.1f;
     public float caveThreshold = 0.65f;
+    public int margin = 2;
     // Multiplos layers
     public float seaLevel = 4f;
     public float maxHeight = 14f;
@@ -35,41 +36,42 @@ public class Chunk : MonoBehaviour
         InitializeChunk();
         // DrawChunk(); //NÃO é chamado aqui — ver D.4
     }
+
     void InitializeChunk()
     {
         chunkData = new Block[chunkSize, chunkSize, chunkSize];
         int[,] surfaceHeight = new int[chunkSize, chunkSize];
-
-        // NOVO: Array para guardar o bloco que a classe WonderlandGenerator decidir para cada (x,z)
+        // Array para guardar o bloco que a classe WonderlandGenerator decidir para cada (x,z)
         Block.BlockType[,] surfaceTypes = new Block.BlockType[chunkSize, chunkSize];
 
-        int margin = 2;
-        float wx, wz, densityNoise;
-        // Preencher os blocos baseados na densidade
+        FillTerrain(surfaceHeight, surfaceTypes);
+        CarveWorm(surfaceHeight);
+        RefineBlockTypes(surfaceHeight, surfaceTypes);
+        PlantMushrooms(surfaceHeight);
+    }
+    void FillTerrain(int[,] surfaceHeight, Block.BlockType[,] surfaceTypes)
+    {
         for (int x = 0; x < chunkSize; x++)
             for (int z = 0; z < chunkSize; z++)
             {
-                wx = worldOffset.x * chunkSize + x;
-                wz = worldOffset.y * chunkSize + z;
+                float wx = worldOffset.x * chunkSize + x;
+                float wz = worldOffset.y * chunkSize + z;
 
                 WonderlandGenerator.GetBiomeData(wx, wz, out float finalHeight, out surfaceTypes[x, z]);
 
                 // primeira passagem para definir altura da superficie
                 for (int y = 0; y < chunkSize; y++)
                 {
-
-                    //heightNoise = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.05f), exponent) * chunkSize;
-                    densityNoise = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
-                    if (finalHeight - y + densityNoise > 0f)
+                    float density = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
+                    if (finalHeight - y + density > 0f)
                         surfaceHeight[x, z] = y;
                 }
 
                 // segunda passagem enche os blocos com carving
                 for (int y = 0; y < chunkSize; y++)
                 {
-                    //heightNoise = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.05f), exponent) * chunkSize;
-                    densityNoise = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
-                    bool solid = finalHeight - y + densityNoise > 0f;
+                    float density = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
+                    bool solid = finalHeight - y + density > 0f;
 
                     if (solid && y > 1 && y < surfaceHeight[x, z] - margin)
                     {
@@ -82,24 +84,25 @@ public class Chunk : MonoBehaviour
 
                     chunkData[x, y, z] = new Block(solid ? Block.BlockType.DIRT : Block.BlockType.AIR, new Vector3(x, y, z));
                 }
-
             }
+    }
 
-        // Inicio deterministico baseado na posição do chunk
+    void CarveWorm(int[,] surfaceHeight)
+    {
         float wx0 = worldOffset.x * chunkSize;
         float wz0 = worldOffset.y * chunkSize;
         float startNoise = NoiseUtils.FBm(wx0, wz0, 4, 0.05f);
-        int startX = Mathf.FloorToInt((startNoise * 0.5f + 0.5f) * chunkSize);
-        int startZ = Mathf.FloorToInt((startNoise * 0.3f + 0.5f) * chunkSize);
-        int startY = surfaceHeight[startX, startZ] / 2; // meio do chão
+        int startX = Mathf.Clamp(Mathf.FloorToInt((startNoise * 0.5f + 0.5f) * chunkSize), 0, chunkSize - 1);
+        int startZ = Mathf.Clamp(Mathf.FloorToInt((startNoise * 0.3f + 0.5f) * chunkSize), 0, chunkSize - 1);
+        int startY = surfaceHeight[startX, startZ] / 2;
 
         CaveGenerator.CarveWorm(chunkData, chunkSize, worldOffset,
             new Vector3(wx0 + startX, startY, wz0 + startZ),
-            steps: 200,
-            radius: 2.5f,
-            stepSize: 1f,
-            directionScale: 0.05f);
-        // refinar tipos com base nos vizinhos solidos refine types using HasSolidNeighbour
+            steps: 200, radius: 2.5f, stepSize: 1f, directionScale: 0.05f);
+    }
+
+    void RefineBlockTypes(int[,] surfaceHeight, Block.BlockType[,] surfaceTypes)
+    {
         for (int x = 0; x < chunkSize; x++)
             for (int y = 0; y < chunkSize; y++)
                 for (int z = 0; z < chunkSize; z++)
@@ -108,51 +111,34 @@ public class Chunk : MonoBehaviour
 
                     if (y <= 2)
                         chunkData[x, y, z].type = Block.BlockType.STONE;
-                    else if (y < surfaceHeight[x, z] && (
-                            !HasSolidNeighbour(x, y + 1, z) ||
-                            !HasSolidNeighbour(x, y, z + 1) ||
-                            !HasSolidNeighbour(x, y, z - 1) ||
-                            !HasSolidNeighbour(x - 1, y, z) ||
-                            !HasSolidNeighbour(x + 1, y, z)))
+                    else if (y < surfaceHeight[x, z] && HasAnySideAir(x, y, z))
                         chunkData[x, y, z].type = Block.BlockType.STONE;
                     else if (!HasSolidNeighbour(x, y + 1, z))
                         chunkData[x, y, z].type = surfaceTypes[x, z];
-
-                    // --- SEMENTE DE COGUMELOS ---
-                    // Verificar se estamos no bioma dos cogumelos e se é superfície
-                    /*                     else if (surfaceTypes[x, z] == Block.BlockType.DIRT && y == surfaceHeight[x, z] - 1)
-                                        {
-                                            // frequência alta para criar ruído branco
-                                            float mushroomChance = NoiseUtils.FBm(worldOffset.x * chunkSize + x, worldOffset.y * chunkSize + z, 1, 0.87f);
-
-                                            if (mushroomChance > 0.85f)
-                                            {
-                                                BuildMushroom(x, y + 1, z);
-                                            }
-                                        } */
                 }
+    }
+
+    void PlantMushrooms(int[,] surfaceHeight)
+    {
         for (int x = 0; x < chunkSize; x++)
-        {
             for (int z = 0; z < chunkSize; z++)
             {
-                // Só queremos plantar na superfície, por isso lemos a altura que guardámos
                 int y = surfaceHeight[x, z];
+                if (!chunkData[x, y, z].isSolid || chunkData[x, y, z].type != Block.BlockType.DIRT) continue;
 
-                // Verificamos se há bloco sólido (chão) e se é DIRT (Bioma dos Cogumelos)
-                if (chunkData[x, y, z].isSolid && chunkData[x, y, z].type == Block.BlockType.DIRT)
-                {
-                    // Frequência alta com offset para evitar números inteiros
-                    float mushroomChance = NoiseUtils.FBm(worldOffset.x * chunkSize + x + 0.5f, worldOffset.y * chunkSize + z + 0.5f, 1, 0.87f);
-
-                    if (mushroomChance > 0.85f)
-                    {
-                        // Plantamos o cogumelo um bloco acima do chão
-                        BuildMushroom(x, y + 1, z);
-                    }
-                }
+                float chance = NoiseUtils.FBm(worldOffset.x * chunkSize + x + 0.5f, worldOffset.y * chunkSize + z + 0.5f, 1, 0.87f);
+                if (chance > 0.85f)
+                    BuildMushroom(x, y + 1, z);
             }
-        }
+    }
 
+    bool HasAnySideAir(int x, int y, int z)
+    {
+        return !HasSolidNeighbour(x, y + 1, z) ||
+               !HasSolidNeighbour(x, y, z + 1) ||
+               !HasSolidNeighbour(x, y, z - 1) ||
+               !HasSolidNeighbour(x - 1, y, z) ||
+               !HasSolidNeighbour(x + 1, y, z);
     }
 
     void BuildMushroom(int startX, int startY, int startZ)
