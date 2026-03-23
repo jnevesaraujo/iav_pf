@@ -8,11 +8,19 @@ public class Chunk : MonoBehaviour
     public Material chunkMaterial;
     public float scale = 0.1f;
     public int octaves = 4;
+    public float exponent = 0.5f;
     public float densityScale = -0.3f;
     public float densityThreshold = -0.1f;
     public int maxSolidHeight = 12;
     public Vector2Int worldOffset;
     public WorldManager worldManager;
+    // variaveis para grutas
+    public float caveScale = 0.1f;
+    public float caveThreshold = 0.65f;
+    // Multiplos layers
+    public float seaLevel = 4f;
+    public float maxHeight = 14f;
+    public float detailAmplitude = 2f;
 
     void Start()
     {
@@ -30,24 +38,68 @@ public class Chunk : MonoBehaviour
     void InitializeChunk()
     {
         chunkData = new Block[chunkSize, chunkSize, chunkSize];
-
+        int[,] surfaceHeight = new int[chunkSize, chunkSize];
+        int margin = 2;
+        float wx, wz, heightNoise, densityNoise, continentalness, baseHeight, detail, finalHeight;
         // Preencher os blocos baseados na densidade
         for (int x = 0; x < chunkSize; x++)
             for (int z = 0; z < chunkSize; z++)
+            {
+                wx = worldOffset.x * chunkSize + x;
+                wz = worldOffset.y * chunkSize + z;
+
+                continentalness = NoiseUtils.FBm(wx, wz, 2, 0.02f);                    // escala muito grande
+                baseHeight = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.02f), exponent);     // forma do terreno
+                detail = NoiseUtils.FBm(wx, wz, 6, 0.1f);                               // detalhe fino
+                finalHeight = Mathf.Lerp(seaLevel, maxHeight, continentalness * baseHeight) + detail * detailAmplitude;
+           
+                // primeira passagem para definir altura da superficie
                 for (int y = 0; y < chunkSize; y++)
                 {
-                    float wx = worldOffset.x * chunkSize + x;
-                    float wz = worldOffset.y * chunkSize + z;
-
-                    float heightNoise = NoiseUtils.FBm(wx, wz, 4, 0.05f) * chunkSize;
-                    float densityNoise = NoiseUtils.Perlin3D((wx * chunkSize + x) * densityScale, y * densityScale, (wz * chunkSize + z) * densityScale);
-                    float finalDensity = heightNoise - y + densityNoise;
-                    bool solid = finalDensity > 0f;
-
-                    Block.BlockType type = solid ? Block.BlockType.DIRT : Block.BlockType.AIR;
-                    chunkData[x, y, z] = new Block(type, new Vector3(x, y, z));
+                    
+                    //heightNoise = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.05f), exponent) * chunkSize;
+                    densityNoise = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
+                    if (finalHeight - y + densityNoise > 0f)
+                        surfaceHeight[x, z] = y;
                 }
 
+                // segunda passagem enche os blocos com carving
+                for (int y = 0; y < chunkSize; y++)
+                {
+                    //heightNoise = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.05f), exponent) * chunkSize;
+                    densityNoise = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
+                    bool solid = finalHeight - y + densityNoise > 0f;
+
+                    if (solid && y > 1 && y < surfaceHeight[x, z] - margin)
+                    {
+                        float cx = (worldOffset.x * chunkSize + x) * caveScale;
+                        float cy = y * caveScale;
+                        float cz = (worldOffset.y * chunkSize + z) * caveScale;
+                        if (NoiseUtils.Perlin3D(cx, cy, cz) > caveThreshold)
+                            solid = false;
+                    }
+
+                    chunkData[x, y, z] = new Block(solid ? Block.BlockType.DIRT : Block.BlockType.AIR, new Vector3(x, y, z));
+                    if (z == 0 && y == 0)
+                        Debug.Log($"x={x} continental={continentalness:F2} base={baseHeight:F2} final={finalHeight:F2}");
+                }
+
+            }
+
+        // Deterministic start point based on chunk position
+        float wx0 = worldOffset.x * chunkSize;
+        float wz0 = worldOffset.y * chunkSize;
+        float startNoise = NoiseUtils.FBm(wx0, wz0, 4, 0.05f);
+        int startX = Mathf.FloorToInt((startNoise * 0.5f + 0.5f) * chunkSize);
+        int startZ = Mathf.FloorToInt((startNoise * 0.3f + 0.5f) * chunkSize);
+        int startY = surfaceHeight[startX, startZ] / 2; // mid-underground
+
+        CaveGenerator.CarveWorm(chunkData, chunkSize, worldOffset,
+            new Vector3(wx0 + startX, startY, wz0 + startZ),
+            steps: 200,
+            radius: 2.5f,
+            stepSize: 1f,
+            directionScale: 0.05f);
         // refinar tipos com base nos vizinhos solidos refine types using HasSolidNeighbour
         for (int x = 0; x < chunkSize; x++)
             for (int y = 0; y < chunkSize; y++)
@@ -57,8 +109,15 @@ public class Chunk : MonoBehaviour
 
                     if (y <= 2)
                         chunkData[x, y, z].type = Block.BlockType.STONE;
+                    else if (y < surfaceHeight[x, z] && (
+                            !HasSolidNeighbour(x, y + 1, z) ||
+                            !HasSolidNeighbour(x, y, z + 1) ||
+                            !HasSolidNeighbour(x, y, z - 1) ||
+                            !HasSolidNeighbour(x - 1, y, z) ||
+                            !HasSolidNeighbour(x + 1, y, z)))
+                        chunkData[x, y, z].type = Block.BlockType.STONE;
                     else if (!HasSolidNeighbour(x, y + 1, z))
-                        chunkData[x, y, z].type = Block.BlockType.GRASS;
+                                chunkData[x, y, z].type = Block.BlockType.GRASS;
                     // else stays DIRT
                 }
     }
@@ -133,6 +192,7 @@ public class Chunk : MonoBehaviour
 
         return neighborChunk.chunkData[x, y, z].isSolid;
     }
+
 
     public void DrawChunk()
     {
