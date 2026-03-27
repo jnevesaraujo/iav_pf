@@ -280,8 +280,7 @@ public class Chunk : MonoBehaviour
 
         // 3. Criar Mesh, atribuir arrays
         Mesh mesh = new Mesh();
-        // usar indices 32-bit pq 16^3 blocks * 6 faces * 4 verts > 65535 (limite 16-bit)
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.uv = uvs.ToArray();
