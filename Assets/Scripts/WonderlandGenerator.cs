@@ -9,7 +9,7 @@ public static class WonderlandGenerator
         // Calculo do Ruído
         // x, z, octaves, scale, persistence, lacunarity
         float magicNoise = NoiseUtils.FBm(wx, wz, 1, 0.005f);
-        //float magicNoise = 0.8f;
+        //float magicNoise = 0.8f; // debug
 
         if (magicNoise < 0.45f)
         {
