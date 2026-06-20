@@ -22,7 +22,7 @@ public class AliceAgent : Agent
     private bool isSmall = false;
     private CharacterController controller;
     private Vector3 velocity;
-
+    float moveX, moveZ;
     private PlayerInputActions inputActions;
     private InputAction moveAction;
 
@@ -37,6 +37,20 @@ public class AliceAgent : Agent
         inputActions = new PlayerInputActions();
         moveAction = inputActions.Player.Move;
         moveAction.Enable();
+    }
+
+
+    void FixedUpdate()
+    {
+        Vector3 move = new Vector3(moveX, 0, moveZ) * moveSpeed;
+
+        if (controller.isGrounded && velocity.y < 0)
+            velocity.y = -2f;
+
+        velocity.y += gravity * Time.fixedDeltaTime;
+        move.y = velocity.y;
+
+        controller.Move(move * Time.fixedDeltaTime);
     }
 
     /// <summary>
@@ -54,7 +68,7 @@ public class AliceAgent : Agent
         velocity = Vector3.zero;
 
         // Alice Spawn Turn off controller to teleport correctly
-        controller.enabled = false; 
+        controller.enabled = false;
         // Spawn Alice in the center of the arena and drop from the sky (Y=25)
         transform.localPosition = new Vector3(Random.Range(8f, 24f), 25f, Random.Range(8f, 24f));
         transform.localRotation = Quaternion.identity;
@@ -62,10 +76,10 @@ public class AliceAgent : Agent
 
         // Objects Spawn
         rabbitTransform.localPosition = new Vector3(Random.Range(4f, 28f), 25f, Random.Range(4f, 28f));
-        
+
         cakeTransform.gameObject.SetActive(true);
         cakeTransform.localPosition = new Vector3(Random.Range(4f, 28f), 25f, Random.Range(4f, 28f));
-        
+
         doorTransform.localPosition = new Vector3(Random.Range(4f, 28f), 25f, Random.Range(4f, 28f));
     }
 
@@ -109,22 +123,9 @@ public class AliceAgent : Agent
         AddReward(-0.001f);
 
         var ca = actions.ContinuousActions;
-        float x = ca[0];
-        float z = ca[1];
+        moveX = ca[0];
+        moveZ = ca[1];
 
-        Vector3 move = new Vector3(x, 0, z) * moveSpeed;
-
-        if (controller.isGrounded && velocity.y < 0)
-        {
-            velocity.y = -2f; // Keeps the agent grounded and prevents it from floating
-        }
-
-        velocity.y += gravity * Time.deltaTime;
-        move.y = velocity.y;
-
-        controller.Move(move * Time.deltaTime);
-
-        // If the agent falls below a certain threshold, it receives a penalty and the episode ends.
         if (transform.localPosition.y < -5f)
         {
             AddReward(-1f);
@@ -164,10 +165,10 @@ public class AliceAgent : Agent
             {
                 isSmall = true;
                 transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                
+
                 // Scale down the ray sensor's length to match the new size of the agent
-                if (raySensor != null) raySensor.RayLength = 40f; 
-                
+                if (raySensor != null) raySensor.RayLength = 40f;
+
                 other.gameObject.SetActive(false);
                 AddReward(0.1f);
             }

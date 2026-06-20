@@ -300,6 +300,7 @@ public class Chunk : MonoBehaviour
             col = gameObject.AddComponent<MeshCollider>();
         }
         col.sharedMesh = mesh;
+        col.isTrigger = true;
         gameObject.tag = "Wall";
     }
 }

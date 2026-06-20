@@ -1109,7 +1109,6 @@ MonoBehaviour:
   gridSize: 5
   chunksPerFrame: 2
   isTrainingArena: 1
-  arenaSizeInChunks: 2
 --- !u!4 &2015103930
 Transform:
   m_ObjectHideFlags: 0
