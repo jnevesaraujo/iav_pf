@@ -14,11 +14,18 @@ public static class WonderlandGenerator
         if (magicNoise < 0.45f)
         {
             // --- ZONA NORMAL ---
-            float continentalness = NoiseUtils.FBm(wx, wz, 2, 0.02f);
+/*             float continentalness = NoiseUtils.FBm(wx, wz, 2, 0.02f);
             float baseHeight = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.02f), 0.5f);
             float detail = NoiseUtils.FBm(wx, wz, 6, 0.1f);
             
             finalHeight = Mathf.Lerp(4f, 14f, continentalness * baseHeight) + detail * 2f;
+            surfaceBlock = Block.BlockType.GRASS; */
+
+            float continentalness = NoiseUtils.FBm(wx, wz, 2, 0.01f); 
+            float baseHeight = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.015f), 0.5f);
+            float detail = NoiseUtils.FBm(wx, wz, 6, 0.03f); // Menos detalhe abrupto
+            
+            finalHeight = Mathf.Lerp(4f, 9f, continentalness * baseHeight) + detail * 1f; 
             surfaceBlock = Block.BlockType.GRASS;
         }
         else if (magicNoise >= 0.45f && magicNoise < 0.55f)

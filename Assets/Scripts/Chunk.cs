@@ -292,5 +292,14 @@ public class Chunk : MonoBehaviour
         // 5. Atribuir ao MeshFilter e MeshRenderer
         GetComponent<MeshFilter>().mesh = mesh;
         GetComponent<MeshRenderer>().material = chunkMaterial;
+
+        // FP :: 6. Adicionar MeshCollider (ou atualizar se já existir) 
+        MeshCollider col = GetComponent<MeshCollider>();
+        if (col == null)
+        {
+            col = gameObject.AddComponent<MeshCollider>();
+        }
+        col.sharedMesh = mesh;
+        gameObject.tag = "Wall";
     }
 }

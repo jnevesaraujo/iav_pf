@@ -20,8 +20,14 @@ public class WorldManager : MonoBehaviour
     public int chunksPerFrame = 2;
     private Coroutine buildRoutine;
 
+    [Header("Treino RL")]
+    public bool isTrainingArena = false;
+    internal Vector2Int physicalOffset = Vector2Int.zero;
+
     void Start()
     {
+        if (isTrainingArena) return;
+
         for (int cx = 0; cx < gridSize; cx++)
             for (int cz = 0; cz < gridSize; cz++)
             {
@@ -31,6 +37,7 @@ public class WorldManager : MonoBehaviour
 
     void Update()
     {
+        if (isTrainingArena) return;
         Vector2Int current = GetPlayerChunk();
 
         if (current != lastPlayerChunk)
@@ -88,7 +95,7 @@ public class WorldManager : MonoBehaviour
         return new Vector2Int(Mathf.FloorToInt(pos.x / chunkSize), Mathf.FloorToInt(pos.z / chunkSize));
     }
 
-    void SpawnChunk(Vector2Int coord)
+    public void SpawnChunk(Vector2Int coord)
     {
         // TODO: Calcular posição world: coord* chunkSize
         Vector3 worldPosition = new Vector3(coord.x * chunkSize, 0, coord.y * chunkSize);
@@ -128,6 +135,19 @@ public class WorldManager : MonoBehaviour
                     yield return null; // pausa até ao próximo frame
             }
         }
+    }
+
+
+    /// <summary>
+    /// Remove todos os chunks ativos da cena de forma síncrona.
+    /// </summary>
+    public void ClearAllChunks()
+    {
+        foreach (var chunk in activeChunks.Values)
+        {
+            if (chunk != null) Destroy(chunk);
+        }
+        activeChunks.Clear();
     }
 
 }
