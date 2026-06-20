@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class PreyAgent : Agent
 {
     [Header("Coordenação")]
-    public PreyPredatorArena arena;
+    public WonderlandArena arena;
     [Header("Movimento")]
     public float moveSpeed = 4f;
     public float gravity = 20f;

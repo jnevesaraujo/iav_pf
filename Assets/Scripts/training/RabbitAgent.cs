@@ -3,43 +3,44 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using UnityEngine.InputSystem;
-[RequireComponent(typeof(CharacterController))]
-public class PredatorAgent : Agent
+
+public class RabbitAgent : Agent
 {
-    [Header("Coordenação")]
+    [Header("Referências")]
+    public Transform alice;
     public WonderlandArena arena;
+
     [Header("Movimento")]
-    public float moveSpeed = 4f;
-    public float gravity = 20f;
+    public float moveSpeed = 8f;
+    public float gravity = -20f;
     private CharacterController controller;
-    private Vector3 velocity;   
-    PlayerInputActions inputActions;
+    private Vector3 velocity;
     private InputAction moveAction;
-    private bool episodeEnded = false;
 
     void Start()
     {
-        // Arrow keys for predator
-        moveAction = new InputAction("PredatorMove");
+        // WASD for prey
+        moveAction = new InputAction("PreyMove", binding: "<Keyboard>/w");
         var moveComposite = moveAction.AddCompositeBinding("2DVector");
-        moveComposite.With("Up", "<Keyboard>/upArrow");
-        moveComposite.With("Down", "<Keyboard>/downArrow");
-        moveComposite.With("Left", "<Keyboard>/leftArrow");
-        moveComposite.With("Right", "<Keyboard>/rightArrow");
+        moveComposite.With("Up", "<Keyboard>/w");
+        moveComposite.With("Down", "<Keyboard>/s");
+        moveComposite.With("Left", "<Keyboard>/a");
+        moveComposite.With("Right", "<Keyboard>/d");
         moveAction.Enable();
 
     }
     public override void Initialize()
     {
         controller = GetComponent<CharacterController>();
-        controller.stepOffset = 1.0f;
+        controller.stepOffset = 1.1f;
     }
     public override void OnEpisodeBegin()
     {
-        // NÃO chama arena.StartEpisode — a presa trata disso
         velocity = Vector3.zero;
-        episodeEnded = false;
+        // O Coelho dita quando a arena reinicia
+        arena.StartEpisode();
     }
+
     public void Place(Vector3 localPosition)
     {
         controller.enabled = false;
@@ -48,45 +49,44 @@ public class PredatorAgent : Agent
         controller.enabled = true;
         velocity = Vector3.zero;
     }
+
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Mesmas observações que a presa — jogo simétrico
+        // Observa apenas a própria velocidade. Os "Olhos" (Raycasts) farão o resto do trabalho.
         sensor.AddObservation(velocity.x / moveSpeed);
         sensor.AddObservation(velocity.z / moveSpeed);
     }
+
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // Ganha uma micro-recompensa por cada momento que sobrevive vivo a fugir
+        AddReward(0.001f);
+
         float moveX = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
         float moveZ = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+
         Vector3 horizontal = new Vector3(moveX, 0f, moveZ) * moveSpeed;
+
         if (controller.isGrounded && velocity.y < 0f) velocity.y = -2f;
-        velocity.y -= gravity * Time.deltaTime;
+
+        velocity.y += gravity * Time.deltaTime;
         velocity.x = horizontal.x;
         velocity.z = horizontal.z;
+
         controller.Move(velocity * Time.deltaTime);
+
+        // Regra Fatal: Caiu do mundo Voxel
+        if (transform.localPosition.y < -5f)
+        {
+            AddReward(-1f);
+            arena.EndAndReset();
+        }
     }
+
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var ca = actionsOut.ContinuousActions;
-        Vector2 move = moveAction.ReadValue<Vector2>();
-        ca[0] = move.x;
-        ca[1] = move.y;
+        ca[0] = Input.GetAxis("Horizontal"); // Usa setas se quiseres controlar o coelho manualmente
+        ca[1] = Input.GetAxis("Vertical");
     }
-/*     private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Prey"))
-        {
-            arena.OnPreyCaptured();
-        }
-    } */
-
-    public void NotifyCapture()
-    {
-        if (!episodeEnded)
-        {
-            episodeEnded = true;
-            arena.OnRabbitCaught();
-        }
-    }
-    
 }
