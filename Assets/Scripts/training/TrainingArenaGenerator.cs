@@ -24,7 +24,7 @@ public class TrainingArenaGenerator : MonoBehaviour
         int randomOffsetX = Random.Range(-10000, 10000);
         int randomOffsetZ = Random.Range(-10000, 10000);
         worldManager.physicalOffset = new Vector2Int(randomOffsetX, randomOffsetZ);
-//teste
+
         // 3. Gera a arena de forma síncrona para que esteja disponível no primeiro frame do episódio.
         for (int cx = 0; cx < arenaSizeInChunks; cx++)
         {

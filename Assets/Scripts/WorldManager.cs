@@ -98,8 +98,9 @@ public class WorldManager : MonoBehaviour
     public void SpawnChunk(Vector2Int coord)
     {
         // TODO: Calcular posição world: coord* chunkSize
-        Vector3 worldPosition = new Vector3(coord.x * chunkSize, 0, coord.y * chunkSize);
-
+        // Vector3 worldPosition = new Vector3(coord.x * chunkSize, 0, coord.y * chunkSize);
+        Vector2Int physicalCoord = coord - physicalOffset;
+        Vector3 worldPosition = new Vector3(physicalCoord.x * chunkSize, 0, physicalCoord.y * chunkSize);
         // TODO: Instantiate do prefab, obter Chunk, chamar Initialize
         GameObject chunkObject = Instantiate(chunkPrefab, worldPosition, Quaternion.identity);
         chunkObject.name = $"Chunk_{coord.x}_{coord.y}";
