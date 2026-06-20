@@ -8,8 +8,8 @@ public class AliceAgent : Agent
 {
     [Header("Scene References")]
     public Transform rabbitTransform;
-    public Transform cakeTransform;
-    public Transform doorTransform;
+/*     public Transform cakeTransform;
+    public Transform doorTransform; */
     public TrainingArenaGenerator arenaBuilder;
 
     [Header("Visual Feedback")]
