@@ -130,13 +130,13 @@ GameObject:
   - component: {fileID: 10982395}
   - component: {fileID: 10982394}
   - component: {fileID: 10982393}
-  - component: {fileID: 10982400}
-  - component: {fileID: 10982392}
   - component: {fileID: 10982397}
+  - component: {fileID: 10982400}
   - component: {fileID: 10982398}
   - component: {fileID: 10982391}
   - component: {fileID: 10982396}
   - component: {fileID: 10982399}
+  - component: {fileID: 10982401}
   m_Layer: 0
   m_Name: Rabbit
   m_TagString: Rabbit
@@ -164,33 +164,6 @@ MonoBehaviour:
   arena: {fileID: 1468021482}
   moveSpeed: 8
   gravity: -20
---- !u!54 &10982392
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 10982389}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
 --- !u!23 &10982393
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -288,7 +261,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: Runaway
+  m_BehaviorName: Rabbit
   TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -357,7 +330,7 @@ MonoBehaviour:
   m_RayLength: 20
   m_RayLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294967283
   m_ObservationStacks: 1
   m_AlternatingRayOrder: 1
   m_UseBatchedRaycasts: 0
@@ -380,14 +353,29 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &10982401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10982389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.DecisionRequester
+  DecisionPeriod: 5
+  DecisionStep: 0
+  TakeActionsBetweenDecisions: 1
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -857,8 +845,7 @@ GameObject:
   - component: {fileID: 1954688675}
   - component: {fileID: 1954688674}
   - component: {fileID: 1954688673}
-  - component: {fileID: 1954688672}
-  - component: {fileID: 1954688671}
+  - component: {fileID: 1954688677}
   - component: {fileID: 1954688670}
   - component: {fileID: 1954688669}
   - component: {fileID: 1954688668}
@@ -893,7 +880,7 @@ MonoBehaviour:
   m_RayLength: 8
   m_RayLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4294967283
   m_ObservationStacks: 2
   m_AlternatingRayOrder: 1
   m_UseBatchedRaycasts: 0
@@ -941,7 +928,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: AliceChase
+  m_BehaviorName: Alice
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -969,56 +956,6 @@ MonoBehaviour:
   loseMaterial: {fileID: 2100000, guid: f5e828dd94f960d4ca9c1eca7fc0035c, type: 2}
   moveSpeed: 20
   gravity: -20
---- !u!54 &1954688671
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1954688666}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
---- !u!136 &1954688672
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1954688666}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &1954688673
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1115,6 +1052,27 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!135 &1954688677
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954688666}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2015103928
 GameObject:

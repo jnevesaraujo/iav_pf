@@ -3,6 +3,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using UnityEngine.InputSystem;
+using System;
 
 public class AliceAgent : Agent
 {
@@ -25,6 +26,7 @@ public class AliceAgent : Agent
     float moveX, moveZ;
     private PlayerInputActions inputActions;
     private InputAction moveAction;
+    private bool episodeEnded = false;
 
     public override void Initialize()
     {
@@ -64,8 +66,9 @@ public class AliceAgent : Agent
     /// </summary>
     public override void OnEpisodeBegin()
     {
-        // A Mente Limpa: A Alice esquece a velocidade anterior. O Árbitro trata do spawn!
+        // Reinicar booelano de fim de episódio e velocidade da alice
         velocity = Vector3.zero;
+        episodeEnded = false;
     }
 
     public void Place(Vector3 localPosition)
@@ -100,11 +103,6 @@ public class AliceAgent : Agent
         moveX = ca[0];
         moveZ = ca[1];
 
-        if (transform.localPosition.y < -5f)
-        {
-            AddReward(-1f);
-            EndEpisode();
-        }
     }
 
     /// <summary>
@@ -132,6 +130,15 @@ public class AliceAgent : Agent
 
         if (other.CompareTag("Rabbit"))
         {
+            arena.OnRabbitCaught();
+        }
+    }
+
+    internal void NotifyCapture()
+    {
+        if (!episodeEnded)
+        {
+            episodeEnded = true;
             arena.OnRabbitCaught();
         }
     }

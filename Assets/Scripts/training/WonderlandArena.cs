@@ -40,14 +40,41 @@ public class WonderlandArena : MonoBehaviour
     private void FixedUpdate()
     {
         stepCount++;
-        // Se stepCount >= maxEpisodeSteps → timeout (presa ganha)
-        // ...
+        
+        // Regra 1: O tempo acabou (Coelho sobreviveu à perseguição!)
         if (stepCount >= maxEpisodeSteps)
         {
-            // timeout: presa sobreviveu, presa ganha
             alice.AddReward(-1f);
-            rabbit.AddReward(1f);
+            rabbit.AddReward(1f); 
+            EndAndReset();
+            return;
+        }
 
+        // Regra 2: Alice caiu da montanha para o abismo (Coelho ganha!)
+        if (alice.transform.localPosition.y < -5f)
+        {
+            alice.AddReward(-1f);
+            rabbit.AddReward(1f); 
+            EndAndReset();
+            return;
+        }
+
+        // Regra 3: Coelho escorregou e caiu no abismo (Alice ganha!)
+        if (rabbit.transform.localPosition.y < -5f)
+        {
+            rabbit.AddReward(-1f);
+            alice.AddReward(1f); 
+            EndAndReset();
+            return;
+        }
+
+        float distance = Vector3.Distance(alice.transform.localPosition, rabbit.transform.localPosition);
+        
+        if (distance < 1.5f)
+        {
+            Debug.Log("Alice caught the rabbit! Distance: " + distance);
+            alice.AddReward(1f); 
+            rabbit.AddReward(-1f); 
             EndAndReset();
         }
     }

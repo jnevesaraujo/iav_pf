@@ -45,7 +45,7 @@ public class Chunk : MonoBehaviour
         Block.BlockType[,] surfaceTypes = new Block.BlockType[chunkSize, chunkSize];
 
         FillTerrain(surfaceHeight, surfaceTypes);
-        CarveWorm(surfaceHeight);
+        //CarveWorm(surfaceHeight);
         RefineBlockTypes(surfaceHeight, surfaceTypes);
         PlantMushrooms(surfaceHeight);
     }
@@ -73,14 +73,16 @@ public class Chunk : MonoBehaviour
                     float density = (NoiseUtils.Perlin3D(wx * densityScale, y * densityScale, wz * densityScale) - 0.5f) * 2f;
                     bool solid = finalHeight - y + density > 0f;
 
-                    if (solid && y > 1 && y < surfaceHeight[x, z] - margin)
+                    /* DESLIGADA A GERAÇÃO DE CAVERNAS POR SER IMPOSSIVEL A ALICE SAIR */
+
+                    /* if (solid && y > 1 && y < surfaceHeight[x, z] - margin)
                     {
                         float cx = (worldOffset.x * chunkSize + x) * caveScale;
                         float cy = y * caveScale;
                         float cz = (worldOffset.y * chunkSize + z) * caveScale;
                         if (NoiseUtils.Perlin3D(cx, cy, cz) > caveThreshold)
                             solid = false;
-                    }
+                    } */
 
                     chunkData[x, y, z] = new Block(solid ? Block.BlockType.DIRT : Block.BlockType.AIR, new Vector3(x, y, z));
                 }

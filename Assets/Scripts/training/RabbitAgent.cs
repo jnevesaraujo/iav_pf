@@ -15,6 +15,7 @@ public class RabbitAgent : Agent
     public float gravity = -20f;
     private CharacterController controller;
     private Vector3 velocity;
+    private float moveX, moveZ;
     private InputAction moveAction;
 
     void Start()
@@ -22,10 +23,10 @@ public class RabbitAgent : Agent
         // WASD for prey
         moveAction = new InputAction("PreyMove", binding: "<Keyboard>/w");
         var moveComposite = moveAction.AddCompositeBinding("2DVector");
-        moveComposite.With("Up", "<Keyboard>/w");
-        moveComposite.With("Down", "<Keyboard>/s");
-        moveComposite.With("Left", "<Keyboard>/a");
-        moveComposite.With("Right", "<Keyboard>/d");
+        moveComposite.With("Up", "<Keyboard>/i");
+        moveComposite.With("Down", "<Keyboard>/k");
+        moveComposite.With("Left", "<Keyboard>/j");
+        moveComposite.With("Right", "<Keyboard>/l");
         moveAction.Enable();
 
     }
@@ -33,6 +34,19 @@ public class RabbitAgent : Agent
     {
         controller = GetComponent<CharacterController>();
         controller.stepOffset = 1.1f;
+    }
+
+    void FixedUpdate()
+    {
+        Vector3 move = new Vector3(moveX, 0, moveZ) * moveSpeed;
+
+        if (controller.isGrounded && velocity.y < 0)
+            velocity.y = -2f;
+
+        velocity.y += gravity * Time.fixedDeltaTime;
+        move.y = velocity.y;
+
+        controller.Move(move * Time.fixedDeltaTime);
     }
     public override void OnEpisodeBegin()
     {
@@ -62,31 +76,26 @@ public class RabbitAgent : Agent
         // Ganha uma micro-recompensa por cada momento que sobrevive vivo a fugir
         AddReward(0.001f);
 
-        float moveX = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
-        float moveZ = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        moveX = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
+        moveZ = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        /* 
+                Vector3 horizontal = new Vector3(moveX, 0f, moveZ) * moveSpeed;
 
-        Vector3 horizontal = new Vector3(moveX, 0f, moveZ) * moveSpeed;
+                if (controller.isGrounded && velocity.y < 0f) velocity.y = -2f;
 
-        if (controller.isGrounded && velocity.y < 0f) velocity.y = -2f;
+                velocity.y += gravity * Time.deltaTime;
+                velocity.x = horizontal.x;
+                velocity.z = horizontal.z;
 
-        velocity.y += gravity * Time.deltaTime;
-        velocity.x = horizontal.x;
-        velocity.z = horizontal.z;
-
-        controller.Move(velocity * Time.deltaTime);
-
-        // Regra Fatal: Caiu do mundo Voxel
-        if (transform.localPosition.y < -5f)
-        {
-            AddReward(-1f);
-            arena.EndAndReset();
-        }
+                controller.Move(velocity * Time.deltaTime);
+         */
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var ca = actionsOut.ContinuousActions;
-        ca[0] = Input.GetAxis("Horizontal"); // Usa setas se quiseres controlar o coelho manualmente
-        ca[1] = Input.GetAxis("Vertical");
+        Vector2 move = moveAction.ReadValue<Vector2>(); 
+        ca[0] = move.x;
+        ca[1] = move.y;
     }
 }

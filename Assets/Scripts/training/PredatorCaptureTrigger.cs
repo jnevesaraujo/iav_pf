@@ -1,15 +1,15 @@
 using UnityEngine;
 
-public class PredatorCaptureTrigger : MonoBehaviour
+public class AliceCaptureTrigger : MonoBehaviour
 {
-    public PredatorAgent predator;
+    public AliceAgent alice;
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("PredatorCaptureTrigger: OnTriggerEnter with " + other.name);
-        if (other.CompareTag("Prey"))
+        Debug.Log("AliceCaptureTrigger: OnTriggerEnter with " + other.name);
+        if (other.CompareTag("Rabbit"))
         {
-            predator.NotifyCapture();
+            alice.NotifyCapture();
         }
     }
 }
