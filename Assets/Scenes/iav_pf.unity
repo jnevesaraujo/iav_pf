@@ -132,11 +132,10 @@ GameObject:
   - component: {fileID: 10982393}
   - component: {fileID: 10982397}
   - component: {fileID: 10982400}
-  - component: {fileID: 10982398}
   - component: {fileID: 10982391}
   - component: {fileID: 10982396}
-  - component: {fileID: 10982399}
   - component: {fileID: 10982401}
+  - component: {fileID: 10982399}
   m_Layer: 0
   m_Name: Rabbit
   m_TagString: Rabbit
@@ -164,6 +163,7 @@ MonoBehaviour:
   arena: {fileID: 1468021482}
   moveSpeed: 8
   gravity: -20
+  turnSpeed: 180
 --- !u!23 &10982393
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -252,11 +252,11 @@ MonoBehaviour:
     VectorObservationSize: 2
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      m_NumContinuousActions: 3
+      BranchSizes: 
+    VectorActionSize: 03000000
     VectorActionDescriptions: []
-    VectorActionSpaceType: 0
+    VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
@@ -292,22 +292,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &10982398
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 10982389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88b6042bc9a5d4aa58d931eae49442e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Agent
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
 --- !u!114 &10982399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -846,11 +830,11 @@ GameObject:
   - component: {fileID: 1954688674}
   - component: {fileID: 1954688673}
   - component: {fileID: 1954688677}
+  - component: {fileID: 1954688676}
   - component: {fileID: 1954688670}
   - component: {fileID: 1954688669}
   - component: {fileID: 1954688668}
   - component: {fileID: 1954688667}
-  - component: {fileID: 1954688676}
   m_Layer: 0
   m_Name: Alice_Agent
   m_TagString: Player
@@ -919,9 +903,9 @@ MonoBehaviour:
     VectorObservationSize: 6
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 2
+      m_NumContinuousActions: 3
       BranchSizes: 
-    VectorActionSize: 02000000
+    VectorActionSize: 03000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1

@@ -58,6 +58,9 @@ public class AliceAgent : Agent
         velocity.y += gravity * Time.fixedDeltaTime;
         move.y = velocity.y;
 
+        if (move.x != 0 || move.z != 0)
+            transform.rotation = Quaternion.LookRotation(new Vector3(move.x, 0, move.z));
+
         controller.Move(move * Time.fixedDeltaTime);
     }
 
@@ -97,7 +100,7 @@ public class AliceAgent : Agent
     /// <param name="actions">The action buffers containing continuous and discrete actions.</param>
     public override void OnActionReceived(ActionBuffers actions)
     {
-        AddReward(-0.001f);
+        //AddReward(-0.001f);
 
         var ca = actions.ContinuousActions;
         moveX = ca[0];
@@ -115,6 +118,7 @@ public class AliceAgent : Agent
         Vector2 move = moveAction.ReadValue<Vector2>();
         ca[0] = move.x;
         ca[1] = move.y;
+        ca[2] = 0f; // No rotation input for now
     }
 
     /// <summary>

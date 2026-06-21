@@ -44,6 +44,7 @@ public class WonderlandArena : MonoBehaviour
         // Regra 1: O tempo acabou (Coelho sobreviveu à perseguição!)
         if (stepCount >= maxEpisodeSteps)
         {
+            Debug.Log("Max steps reached. Ending episode. Rabbit wins by survival.");
             alice.AddReward(-1f);
             rabbit.AddReward(1f); 
             EndAndReset();
@@ -53,6 +54,7 @@ public class WonderlandArena : MonoBehaviour
         // Regra 2: Alice caiu da montanha para o abismo (Coelho ganha!)
         if (alice.transform.localPosition.y < -5f)
         {
+            Debug.Log("Alice fell off the cliff. Rabbit wins!");
             alice.AddReward(-1f);
             rabbit.AddReward(1f); 
             EndAndReset();
@@ -62,6 +64,7 @@ public class WonderlandArena : MonoBehaviour
         // Regra 3: Coelho escorregou e caiu no abismo (Alice ganha!)
         if (rabbit.transform.localPosition.y < -5f)
         {
+            Debug.Log("Rabbit fell off the cliff. Alice wins!");
             rabbit.AddReward(-1f);
             alice.AddReward(1f); 
             EndAndReset();
