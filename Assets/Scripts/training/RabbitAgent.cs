@@ -20,6 +20,10 @@ public class RabbitAgent : Agent
     private float moveX, moveZ;
     private InputAction moveAction;
 
+    [Header("Leash (mundo aberto)")]
+    public bool enableLeash = false;
+    public float leashDistance = 20f;
+
     void Start()
     {
         // IJKL for prey
@@ -43,17 +47,35 @@ public class RabbitAgent : Agent
     {
         Vector3 move = new Vector3(moveX, 0, moveZ) * moveSpeed;
 
+        if (enableLeash && alice != null)
+            move = ClampToLeash(move);
+
         if (controller.isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
         velocity.y += gravity * Time.fixedDeltaTime;
         move.y = velocity.y;
 
-        if (move.x != 0 || move.z != 0)
-            transform.rotation = Quaternion.LookRotation(new Vector3(move.x, 0, move.z));
-
         controller.Move(move * Time.fixedDeltaTime);
     }
+
+    Vector3 ClampToLeash(Vector3 desiredMove)
+    {
+        Vector3 toAlice = alice.position - transform.position;
+        toAlice.y = 0f;
+        float distance = toAlice.magnitude;
+
+        if (distance <= leashDistance) return desiredMove;
+
+        Vector3 directionAwayFromAlice = -toAlice.normalized;
+        float outwardAmount = Vector3.Dot(desiredMove, directionAwayFromAlice);
+
+        if (outwardAmount > 0f)
+            desiredMove -= directionAwayFromAlice * outwardAmount; // só remove a componente que afasta, mantém lateral
+
+        return desiredMove;
+    }
+    
     public override void OnEpisodeBegin()
     {
         velocity = Vector3.zero;
