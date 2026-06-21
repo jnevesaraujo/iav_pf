@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 public class WonderlandArena : MonoBehaviour
 {
@@ -13,10 +14,11 @@ public class WonderlandArena : MonoBehaviour
     //public float arenaHalfSize = 4.5f;
 
     [Header("Feedback visual (opcional)")]
-    public MeshRenderer floorRenderer;
-    public Material defaultMaterial;
-    public Material predatorWinMaterial;
-    public Material preyWinMaterial;
+    public Material defaultSkybox;
+    public Material aliceWinSkybox; 
+    public Material rabbitWinSkybox; 
+    
+    private bool isEpisodeEnding = false;
     private int stepCount;
     public void StartEpisode()
     {
@@ -24,6 +26,9 @@ public class WonderlandArena : MonoBehaviour
         // Presa: Z positivo; Predador: Z negativo
         // ...
         stepCount = 0;
+        isEpisodeEnding = false;
+
+        if (defaultSkybox != null) RenderSettings.skybox = defaultSkybox;
 
         bool isTraining = arenaBuilder != null
         && arenaBuilder.worldManager != null
@@ -43,35 +48,28 @@ public class WonderlandArena : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isEpisodeEnding) return;
+
         stepCount++;
 
         // Regra 1: O tempo acabou (Coelho sobreviveu à perseguição!)
         if (stepCount >= maxEpisodeSteps)
         {
-            Debug.Log("Max steps reached. Ending episode. Rabbit wins by survival.");
-            alice.AddReward(-1f);
-            rabbit.AddReward(1f);
-            EndAndReset();
+            StartCoroutine(EndGameSequence(rabbitWinSkybox, 1f, -1f));
             return;
         }
 
         // Regra 2: Alice caiu da montanha para o abismo (Coelho ganha!)
         if (alice.transform.localPosition.y < -5f)
         {
-            Debug.Log("Alice fell off the cliff. Rabbit wins!");
-            alice.AddReward(-1f);
-            rabbit.AddReward(1f);
-            EndAndReset();
+            StartCoroutine(EndGameSequence(rabbitWinSkybox, 1f, -1f));
             return;
         }
 
         // Regra 3: Coelho escorregou e caiu no abismo (Alice ganha!)
         if (rabbit.transform.localPosition.y < -5f)
         {
-            Debug.Log("Rabbit fell off the cliff. Alice wins!");
-            rabbit.AddReward(-1f);
-            alice.AddReward(1f);
-            EndAndReset();
+            StartCoroutine(EndGameSequence(aliceWinSkybox, -1f, 1f));
             return;
         }
 
@@ -79,17 +77,14 @@ public class WonderlandArena : MonoBehaviour
 
         if (distance < 1.5f)
         {
-            Debug.Log("Alice caught the rabbit! Distance: " + distance);
-            alice.AddReward(1f);
-            rabbit.AddReward(-1f);
-            EndAndReset();
+            StartCoroutine(EndGameSequence(aliceWinSkybox, -1f, 1f));
         }
     }
     public void OnRabbitCaught()
     {
         // Predador tocou na presa: +1 predador, ‐1 presa
         // ...
-        alice.AddReward(1f);
+        alice.AddReward(1f);    
         rabbit.AddReward(-1f);
 
         EndAndReset();
@@ -102,5 +97,19 @@ public class WonderlandArena : MonoBehaviour
         Debug.Log("Ending episode. Step count: " + stepCount);
         alice.EndEpisode();
         rabbit.EndEpisode();
+    }
+
+    private IEnumerator EndGameSequence(Material winningSkybox, float rabbitReward, float aliceReward)
+    {
+        isEpisodeEnding = true; 
+
+        rabbit.AddReward(rabbitReward);
+        alice.AddReward(aliceReward);
+
+        if (winningSkybox != null) RenderSettings.skybox = winningSkybox;
+
+        yield return new WaitForSeconds(3f);
+
+        EndAndReset();
     }
 }
