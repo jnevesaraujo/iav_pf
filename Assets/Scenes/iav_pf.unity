@@ -166,7 +166,7 @@ MonoBehaviour:
   gravity: -20
   turnSpeed: 180
   enableLeash: 0
-  leashDistance: 20
+  leashDistance: 32
 --- !u!23 &10982393
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -785,10 +785,9 @@ MonoBehaviour:
   alice: {fileID: 1954688670}
   rabbit: {fileID: 10982391}
   maxEpisodeSteps: 2000
-  floorRenderer: {fileID: 0}
-  defaultMaterial: {fileID: 0}
-  predatorWinMaterial: {fileID: 0}
-  preyWinMaterial: {fileID: 0}
+  defaultSkybox: {fileID: 2100000, guid: f3d20474b7b29874c9e1a91ec6a869c8, type: 2}
+  aliceWinSkybox: {fileID: 2100000, guid: e290cdb83409a5f48848375886411d39, type: 2}
+  rabbitWinSkybox: {fileID: 2100000, guid: f5e828dd94f960d4ca9c1eca7fc0035c, type: 2}
 --- !u!1 &1954688666
 GameObject:
   m_ObjectHideFlags: 0

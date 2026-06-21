@@ -22,7 +22,7 @@ public class RabbitAgent : Agent
 
     [Header("Leash (mundo aberto)")]
     public bool enableLeash = false;
-    public float leashDistance = 20f;
+    public float leashDistance = 32f;
 
     void Start()
     {

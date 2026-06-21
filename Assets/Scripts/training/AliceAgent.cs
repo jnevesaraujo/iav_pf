@@ -67,7 +67,7 @@ public class AliceAgent : Agent
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             // Slerp: Roda suavemente (interpolação)
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * 8f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * 4f);
         }
 
         controller.Move(move * Time.fixedDeltaTime);

@@ -77,17 +77,14 @@ public class WonderlandArena : MonoBehaviour
 
         if (distance < 1.5f)
         {
-            StartCoroutine(EndGameSequence(aliceWinSkybox, -1f, 1f));
+            OnRabbitCaught();
         }
     }
     public void OnRabbitCaught()
     {
         // Predador tocou na presa: +1 predador, ‐1 presa
         // ...
-        alice.AddReward(1f);    
-        rabbit.AddReward(-1f);
-
-        EndAndReset();
+        StartCoroutine(EndGameSequence(aliceWinSkybox, -1f, 1f));
     }
 
     public void EndAndReset()
@@ -108,7 +105,7 @@ public class WonderlandArena : MonoBehaviour
 
         if (winningSkybox != null) RenderSettings.skybox = winningSkybox;
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1.5f);
 
         EndAndReset();
     }

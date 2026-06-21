@@ -21,6 +21,8 @@ public static class WonderlandGenerator
             finalHeight = Mathf.Lerp(4f, 14f, continentalness * baseHeight) + detail * 2f;
             surfaceBlock = Block.BlockType.GRASS; */
 
+            // ADAPTADO PARA PROJECTO FINAL: menos detalhe abrupto, mais suave
+
             float continentalness = NoiseUtils.FBm(wx, wz, 2, 0.01f); 
             float baseHeight = Mathf.Pow(NoiseUtils.FBm(wx, wz, 4, 0.015f), 0.5f);
             float detail = NoiseUtils.FBm(wx, wz, 6, 0.03f); // Menos detalhe abrupto
