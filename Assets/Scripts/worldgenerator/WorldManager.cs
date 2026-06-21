@@ -43,6 +43,7 @@ public class WorldManager : MonoBehaviour
                 for (int cz = 0; cz < gridSize; cz++)
                     SpawnChunk(new Vector2Int(cx, cz));
         }
+        Debug.Log($"trackedTargets: {trackedTargets.Count}, Alice pos: {(trackedTargets.Count > 0 ? trackedTargets[0].position.ToString() : "n/a")}");
     }
 
     void Update()

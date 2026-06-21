@@ -26,7 +26,7 @@ public class AliceAgent : Agent
     float moveX, moveZ;
     private PlayerInputActions inputActions;
     private InputAction moveAction;
-    private bool episodeEnded = false;
+    private Vector3 smoothedMovement;
 
     public override void Initialize()
     {
@@ -50,7 +50,11 @@ public class AliceAgent : Agent
 
     void FixedUpdate()
     {
-        Vector3 move = new Vector3(moveX, 0, moveZ) * moveSpeed;
+        Vector3 rawMove = new Vector3(moveX, 0, moveZ) * moveSpeed;
+        
+        smoothedMovement = Vector3.Lerp(smoothedMovement, rawMove, Time.fixedDeltaTime * 8f);
+        //Vector3 move = new Vector3(moveX, 0, moveZ) * moveSpeed;
+        Vector3 move = smoothedMovement;
 
         if (controller.isGrounded && velocity.y < 0)
             velocity.y = -2f;
@@ -58,10 +62,20 @@ public class AliceAgent : Agent
         velocity.y += gravity * Time.fixedDeltaTime;
         move.y = velocity.y;
 
-        if (move.x != 0 || move.z != 0)
-            transform.rotation = Quaternion.LookRotation(new Vector3(move.x, 0, move.z));
+        Vector3 direction = new Vector3(move.x, 0, move.z);
+        if (direction.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            // Slerp: Roda suavemente (interpolação)
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * 8f);
+        }
 
         controller.Move(move * Time.fixedDeltaTime);
+
+/*         Vector3 beforePos = transform.position;
+        controller.Move(move * Time.fixedDeltaTime);
+        Vector3 actualDelta = transform.position - beforePos;
+        Debug.Log($"requested: {move}, actual: {actualDelta}"); */
     }
 
     /// <summary>
@@ -71,7 +85,6 @@ public class AliceAgent : Agent
     {
         // Reinicar booelano de fim de episódio e velocidade da alice
         velocity = Vector3.zero;
-        episodeEnded = false;
     }
 
     public void Place(Vector3 localPosition)
@@ -88,10 +101,8 @@ public class AliceAgent : Agent
     /// <param name="sensor">The sensor used to collect observations.</param>
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(transform.localPosition); // 3 floats
-        sensor.AddObservation(rabbitTransform.localPosition); // 3 floats
-
-        // TOTAL = 6 floats. O resto é visto pelos olhos (Raycasts).
+        Vector3 toRabbit = rabbitTransform.localPosition - transform.localPosition;
+        sensor.AddObservation(toRabbit.normalized);
     }
 
     /// <summary>
@@ -118,7 +129,6 @@ public class AliceAgent : Agent
         Vector2 move = moveAction.ReadValue<Vector2>();
         ca[0] = move.x;
         ca[1] = move.y;
-        ca[2] = 0f; // No rotation input for now
     }
 
     /// <summary>
@@ -134,15 +144,6 @@ public class AliceAgent : Agent
 
         if (other.CompareTag("Rabbit"))
         {
-            arena.OnRabbitCaught();
-        }
-    }
-
-    internal void NotifyCapture()
-    {
-        if (!episodeEnded)
-        {
-            episodeEnded = true;
             arena.OnRabbitCaught();
         }
     }

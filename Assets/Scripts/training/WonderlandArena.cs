@@ -3,7 +3,7 @@ public class WonderlandArena : MonoBehaviour
 {
     [Header("Mundo Procedimental")]
     public TrainingArenaGenerator arenaBuilder;
-    
+
     [Header("Agentes")]
     public AliceAgent alice;
     public RabbitAgent rabbit;
@@ -25,28 +25,32 @@ public class WonderlandArena : MonoBehaviour
         // ...
         stepCount = 0;
 
-        if (arenaBuilder != null)
+        bool isTraining = arenaBuilder != null
+        && arenaBuilder.worldManager != null
+        && arenaBuilder.worldManager.isTrainingArena;
+
+        if (isTraining)
         {
             arenaBuilder.RebuildArenaRandomly();
-        }
 
-        alice.Place(new Vector3(Random.Range(8f, 24f), 25f, Random.Range(8f, 24f)));
-        
-        rabbit.gameObject.SetActive(true);
-        rabbit.Place(new Vector3(Random.Range(8f, 24f), 25f, Random.Range(8f, 24f)));
+            alice.Place(new Vector3(Random.Range(8f, 24f), 15f, Random.Range(8f, 24f)));
+            rabbit.Place(new Vector3(Random.Range(8f, 24f), 15f, Random.Range(8f, 24f)));
+        }
+        alice.Place(new Vector3(Random.Range(0f, 64f), 15f, Random.Range(0f, 64f)));
+        rabbit.Place(new Vector3(Random.Range(0f, 64f), 15f, Random.Range(0f, 64f)));
     }
 
 
     private void FixedUpdate()
     {
         stepCount++;
-        
+
         // Regra 1: O tempo acabou (Coelho sobreviveu à perseguição!)
         if (stepCount >= maxEpisodeSteps)
         {
             Debug.Log("Max steps reached. Ending episode. Rabbit wins by survival.");
             alice.AddReward(-1f);
-            rabbit.AddReward(1f); 
+            rabbit.AddReward(1f);
             EndAndReset();
             return;
         }
@@ -56,7 +60,7 @@ public class WonderlandArena : MonoBehaviour
         {
             Debug.Log("Alice fell off the cliff. Rabbit wins!");
             alice.AddReward(-1f);
-            rabbit.AddReward(1f); 
+            rabbit.AddReward(1f);
             EndAndReset();
             return;
         }
@@ -66,18 +70,18 @@ public class WonderlandArena : MonoBehaviour
         {
             Debug.Log("Rabbit fell off the cliff. Alice wins!");
             rabbit.AddReward(-1f);
-            alice.AddReward(1f); 
+            alice.AddReward(1f);
             EndAndReset();
             return;
         }
 
         float distance = Vector3.Distance(alice.transform.localPosition, rabbit.transform.localPosition);
-        
+
         if (distance < 1.5f)
         {
             Debug.Log("Alice caught the rabbit! Distance: " + distance);
-            alice.AddReward(1f); 
-            rabbit.AddReward(-1f); 
+            alice.AddReward(1f);
+            rabbit.AddReward(-1f);
             EndAndReset();
         }
     }
