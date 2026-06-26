@@ -41,8 +41,11 @@ public class WonderlandArena : MonoBehaviour
             alice.Place(new Vector3(Random.Range(8f, 24f), 15f, Random.Range(8f, 24f)));
             rabbit.Place(new Vector3(Random.Range(8f, 24f), 15f, Random.Range(8f, 24f)));
         }
-        alice.Place(new Vector3(Random.Range(0f, 64f), 15f, Random.Range(0f, 64f)));
-        rabbit.Place(new Vector3(Random.Range(0f, 64f), 15f, Random.Range(0f, 64f)));
+        else
+        {
+            alice.Place(new Vector3(Random.Range(0f, 128f), 15f, Random.Range(0f, 128f)));
+            rabbit.Place(new Vector3(Random.Range(0f, 128f), 15f, Random.Range(0f, 128f)));
+        }
     }
 
 

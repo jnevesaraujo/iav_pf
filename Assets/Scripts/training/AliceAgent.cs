@@ -51,7 +51,7 @@ public class AliceAgent : Agent
     void FixedUpdate()
     {
         Vector3 rawMove = new Vector3(moveX, 0, moveZ) * moveSpeed;
-        
+
         smoothedMovement = Vector3.Lerp(smoothedMovement, rawMove, Time.fixedDeltaTime * 8f);
         //Vector3 move = new Vector3(moveX, 0, moveZ) * moveSpeed;
         Vector3 move = smoothedMovement;
@@ -72,10 +72,10 @@ public class AliceAgent : Agent
 
         controller.Move(move * Time.fixedDeltaTime);
 
-/*         Vector3 beforePos = transform.position;
-        controller.Move(move * Time.fixedDeltaTime);
-        Vector3 actualDelta = transform.position - beforePos;
-        Debug.Log($"requested: {move}, actual: {actualDelta}"); */
+        /*         Vector3 beforePos = transform.position;
+                controller.Move(move * Time.fixedDeltaTime);
+                Vector3 actualDelta = transform.position - beforePos;
+                Debug.Log($"requested: {move}, actual: {actualDelta}"); */
     }
 
     /// <summary>
@@ -126,9 +126,33 @@ public class AliceAgent : Agent
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var ca = actionsOut.ContinuousActions;
+
         Vector2 move = moveAction.ReadValue<Vector2>();
-        ca[0] = move.x;
-        ca[1] = move.y;
+
+        // Se não houver câmara principal na cena, usa o movimento global normal como plano B
+        if (Camera.main == null)
+        {
+            ca[0] = move.x;
+            ca[1] = move.y;
+            return;
+        }
+
+        // Verifica para onde a câmara está a olhar (ignorar o eixo Y / altura)
+        Transform camTransform = Camera.main.transform;
+
+        Vector3 camForward = camTransform.forward;
+        camForward.y = 0f;
+        camForward.Normalize();
+
+        Vector3 camRight = camTransform.right;
+        camRight.y = 0f;
+        camRight.Normalize();
+
+        // converte o input local num vetor global
+        Vector3 playerIntent = (camForward * move.y) + (camRight * move.x);
+
+        ca[0] = playerIntent.x;
+        ca[1] = playerIntent.z;
     }
 
     /// <summary>

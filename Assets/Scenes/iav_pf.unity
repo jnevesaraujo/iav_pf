@@ -261,7 +261,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 6c3224dd64abe6c47b3b1093da74754c, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: fab9e8c6c5fe6e34687a36bf6960d90f, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: Rabbit
